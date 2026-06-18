@@ -60,8 +60,8 @@
 
    use(m5-1.0)
    
-   macro(team_YOUR_GITHUB_ID_module, ['
-      module team_YOUR_GITHUB_ID (
+   macro(team_1269580875_module, ['
+      module team_1269580875 (
          input wire clk,
          input wire reset,
          // === Game Context ===
@@ -113,11 +113,11 @@
 
 // [Optional]
 // Visualization of your logic.
-\TLV team_YOUR_GITHUB_ID_viz(/_top, /_me, #player)
+\TLV team_1269580875_viz(/_top, /_me, #player)
    /// Define m5_mySigVal() for accessing Verilog signals in your module.
    /// Called similar to sigVal() but without the need for the Verilog module path and without quotes.
    /// Example: m5_mySigVal(rolls_this_turn)  // names as seen in WAVEFORM w/ "." as hierarchy separator
-   m5_macro(mySigVal, ['['this.sigVal("team_YOUR_GITHUB_ID_']#player.$']['1['")']'])
+   m5_macro(mySigVal, ['['this.sigVal("team_1269580875_']#player.$']['1['")']'])
    \viz_js
       box: {width: 40, height: 100, strokeWidth: 1},
       where: {left: 50, top: 0, width: 40, height: 100},
@@ -129,7 +129,7 @@
          o.box.group.set({opacity: '$my_turn'.asBool() ? 1 : 0})
          
          // Access your signals for visualization
-         // Note: For Verilog modules, access signals using this.sigVal("team_YOUR_GITHUB_ID.signal_name")
+         // Note: For Verilog modules, access signals using this.sigVal("team_1269580875.signal_name")
          const rolls = m5_mySigVal(rolls_this_turn).asInt();
 
          // Return fabric.js objects to display
@@ -142,9 +142,9 @@
       }
 
 
-\TLV team_YOUR_GITHUB_ID(/_top, /_me, #player)
-   m5+verilog_wrapper(/_top, /_me, #player, YOUR_GITHUB_ID)
-   ///m5+team_YOUR_GITHUB_ID_viz(/_top, /_me, #player)   /// Uncomment line ("///") to enable custom visualization
+\TLV team_1269580875(/_top, /_me, #player)
+   m5+verilog_wrapper(/_top, /_me, #player, 1269580875)
+   ///m5+team_1269580875_viz(/_top, /_me, #player)   /// Uncomment line ("///") to enable custom visualization
 
 
 
@@ -165,7 +165,7 @@
    // Your player. Provide:
    //   - your GitHub ID (as in your module name, above)
    //   - your player name--anything you like (that isn't crude or disrespectful)
-   m5_define_player(YOUR_GITHUB_ID, YOUR_PLAYER_NAME)
+   m5_define_player(1269580875, TMU_ECEC)
    // Choose your opponent(s) (up to you + 4 opponents).
    // To include code for other opponents, add a `include_lib` above.
    // Note that inactive players must be commented with "///", not "//", to prevent M5 macro evaluation.

@@ -70,7 +70,7 @@
 //   #player: This player's index (0, 1, ...)
 //            Use: e.g., /_top/player[#player]/tower[2]$floor
 // See example opponent logic in `eleven_towers_lib.tlv` for reference.
-\TLV team_YOUR_GITHUB_ID(/_top, /_me, #player)
+\TLV team_1269580875(/_top, /_me, #player)
    
    //-----------------------\
    //  Your Code Goes Here  |
@@ -130,7 +130,7 @@
    // Your player. Provide:
    //   - your GitHub ID (as in your \TLV team_* macro, above)
    //   - your player name--anything you like (that isn't crude or disrespectful)
-   m5_define_player(YOUR_GITHUB_ID, YOUR_PLAYER_NAME)
+   m5_define_player(1269580875, TMU_ECEC)
    
    // Choose your opponent(s) (up to you + 4 opponents).
    // "random" and "seven" are example opponents defined in eleven_towers_lib.tlv.
