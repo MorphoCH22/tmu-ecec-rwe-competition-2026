@@ -91,9 +91,16 @@
       // | Your Verilog logic goes here |
       // \------------------------------/
 
+      // TODO: make this a reg that changes per clock cycle
+      wire [3:0] distance_from_top [12:2];
+      assign distance_from_top  = tower_height - tower_climb_floor;
+      
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
       // Random scoring for each pairing (replace with your strategy)
+      // Highest score pair gets picked, in order of first pairs to last pairs
+      
+      // Check for most optimal pairing_sum that leads to smallest distance_from_top?
       assign pairing_score[0] = 16'd100;
       assign pairing_score[1] = 16'd200;
       assign pairing_score[2] = 16'd150;
@@ -104,7 +111,10 @@
       assign priority_pair[2] = 1'b0;
       
       // End turn strategy (replace with your logic)
-      assign end_turn = rolls_this_turn >= 8'd3;
+      // Always end at 3 or tower completion
+      // Maybe factor in number of towers climbing too
+      // TODO: Something like end_turn = (rolls_this_turn >= 8'd3) || (distance_from_top[12:2] == 0)
+      assign end_turn = (rolls_this_turn >= 8'd3);
 
       endmodule
    '])
