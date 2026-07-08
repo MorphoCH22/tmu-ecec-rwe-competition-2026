@@ -90,6 +90,19 @@
       // /------------------------------\
       // | Your Verilog logic goes here |
       // \------------------------------/
+      logic [3:0] tower_distance [12:2];
+      integer i;
+
+    always_ff @(posedge clk) begin
+    if (reset) begin
+        for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= 4'd0;
+    end
+    else begin
+        for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
+    end
+end
 
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
