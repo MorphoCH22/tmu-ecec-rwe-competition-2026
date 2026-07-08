@@ -91,6 +91,8 @@
       // | Your Verilog logic goes here |
       // \------------------------------/
 
+      localparam [2:0] roll_probabilities [12:2] = {1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1};
+      
       // TODO: make this a reg that changes per clock cycle
       wire [3:0] distance_from_top [12:2];
       assign distance_from_top  = tower_height - tower_climb_floor;
