@@ -90,6 +90,19 @@
       // /------------------------------\
       // | Your Verilog logic goes here |
       // \------------------------------/
+      logic [3:0] tower_distance [12:2];
+      integer i;
+
+    always_ff @(posedge clk) begin
+    if (reset) begin
+        for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= 4'd0;
+    end
+    else begin
+        for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
+    end
+end
 
       localparam [2:0] roll_probabilities [12:2] = {1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1};
       
