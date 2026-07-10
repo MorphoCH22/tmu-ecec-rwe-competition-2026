@@ -90,21 +90,29 @@
       // /------------------------------\
       // | Your Verilog logic goes here |
       // \------------------------------/
+
+      // PROBABILITY CONSTANTS
+      localparam [8:0] roll_probabilities [12:2] = {1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1};
+
+      // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
       integer i;
 
-    always_ff @(posedge clk) begin
-    if (reset) begin
-        for (i = 2; i <= 12; i = i + 1)
+      // TODO: might need to consider if combinational logic would be better here...
+      always_ff @(posedge clk) begin
+        if (reset) begin
+          for (i = 2; i <= 12; i = i + 1)
             tower_distance[i] <= 4'd0;
-    end
-    else begin
-        for (i = 2; i <= 12; i = i + 1)
+    	  end
+    	else begin
+          for (i = 2; i <= 12; i = i + 1)
             tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
-    end
-end
+    	  end
+      end
 
-      localparam [2:0] roll_probabilities [12:2] = {1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1};
+      // ELIGIBLE TOWERS STACK
+      // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
+
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
@@ -112,6 +120,7 @@ end
       // Highest score pair gets picked, in order of first pairs to last pairs
       
       // Check for most optimal pairing_sum that leads to smallest distance_from_top?
+      // TODO: use equation on both priority_pair options, use best score as pairing_score and set priority_pair to higher scoring pair
       assign pairing_score[0] = 16'd100;
       assign pairing_score[1] = 16'd200;
       assign pairing_score[2] = 16'd150;
@@ -122,9 +131,8 @@ end
       assign priority_pair[2] = 1'b0;
       
       // End turn strategy (replace with your logic)
-      // Always end at 3 or tower completion
-      // Maybe factor in number of towers climbing too
-      // TODO: Something like end_turn = (rolls_this_turn >= 8'd3) || (distance_from_top[12:2] == 0)
+      // END_TURN LOGIC
+      // TODO: Something like end_turn = (rolls_this_turn >= 8'd3 && climbing_cnt == 3) || (any of distance_from_top[12:2] == 0)
       assign end_turn = (rolls_this_turn >= 8'd3);
 
       endmodule
