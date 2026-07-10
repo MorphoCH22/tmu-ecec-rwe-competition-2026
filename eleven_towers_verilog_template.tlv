@@ -111,6 +111,21 @@
     	  end
       end
 
+      logic tower_completed [12:2];//Check if tower is completed
+      integer j;
+      always_comb begin
+        for (j = 2; j <= 12; j = j + 1) begin
+            if (my_turn && tower_climbing[j] && tower_distance[j] == 4'd0) begin
+                tower_completed[j] = 1'b1;
+            end else begin
+                tower_completed[j] = 1'b0;
+            end
+      end
+      end
+
+
+
+
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
 
