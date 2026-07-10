@@ -91,8 +91,9 @@
       // | Your Verilog logic goes here |
       // \------------------------------/
 
-      // PROBABILITY CONSTANTS
-      localparam [8:0] roll_probabilities [12:2] = {1, 2, 3, 4, 5, 6, 5, 4, 3, 2, 1};
+      // PROBABILITY CONSTANTS & RECOMENDED THRESHOLD
+      localparam [8:0] roll_probabilities [12:2] = {171, 302, 461, 580, 727, 834, 727, 580, 461, 302, 171};
+      localparam [9:0] probability_threshold = 10'd1500;
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
