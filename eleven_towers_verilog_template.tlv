@@ -128,6 +128,23 @@
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
+      logic [3:0] best_sum;
+      logic [10:0] best_probability;
+      logic best_pair;
+      logic [1:0] best_pairing;
+      logic [10:0] current_probability;
+      for(p = 0; p < 3; p = p + 1) begin
+
+    current_probability =
+        roll_probabilities[pairing_sum[p][0]] +
+        roll_probabilities[pairing_sum[p][1]];
+
+    if(current_probability > best_probability) begin
+        best_probability <= current_probability;
+        best_pairing <= p;
+    end
+
+end
 
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
