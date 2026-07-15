@@ -98,29 +98,17 @@
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
-      integer i;
-
-      // TODO: might need to consider if combinational logic would be better here...
-      always_comb begin
-      for (i = 2; i <= 12; i = i + 1) begin
-        tower_distance[i] = tower_height[i] - tower_climb_floor[i];
-    end
-end
-
       logic tower_completed [12:2];//Check if tower is completed
-      integer j;
+
+      integer i;
       always_comb begin
-        for (j = 2; j <= 12; j = j + 1) begin
-            if (my_turn && tower_climbing[j] && tower_distance[j] == 4'd0) begin
-                tower_completed[j] = 1'b1;
-            end else begin
-                tower_completed[j] = 1'b0;
-            end
+        for (i = 2; i <= 12; i = i + 1) begin
+          tower_distance[i] = tower_height[i] - tower_climb_floor[i];
+        end
+        for (i = 2; i <= 12; i = i + 1) begin
+          tower_completed[i] = my_turn && tower_climbing[i] && tower_distance[i] == 4'd0;
+        end
       end
-      end
-
-
-
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
@@ -131,17 +119,19 @@ end
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
-      for(p = 0; p < 3; p = p + 1) begin
 
-    current_probability =
-        roll_probabilities[pairing_sum[p][0]] +
-        roll_probabilities[pairing_sum[p][1]];
+      integer p;
 
-    if(current_probability > best_probability) begin
-        best_probability <= current_probability;
-        best_pairing <= p;
-    end
-end
+      always_comb begin
+        for(p = 0; p < 3; p = p + 1) begin
+          current_probability = roll_probabilities[pairing_sum[p][0]] + roll_probabilities[pairing_sum[p][1]];
+
+          if(current_probability > best_probability) begin
+            best_probability = current_probability;
+            best_pairing     = p[1:0]; // Cast/slice integer 'p' to match 2-bit variable
+          end
+        end
+      end
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
