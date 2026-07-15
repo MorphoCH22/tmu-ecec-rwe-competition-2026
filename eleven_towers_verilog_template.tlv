@@ -100,16 +100,11 @@
       integer i;
 
       // TODO: might need to consider if combinational logic would be better here...
-      always_ff @(posedge clk) begin
-        if (reset) begin
-          for (i = 2; i <= 12; i = i + 1)
-            tower_distance[i] <= 4'd0;
-    	  end
-    	else begin
-          for (i = 2; i <= 12; i = i + 1)
-            tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
-    	  end
-      end
+      always_comb begin
+      for (i = 2; i <= 12; i = i + 1) begin
+        tower_distance[i] = tower_height[i] - tower_climb_floor[i];
+    end
+end
 
       logic tower_completed [12:2];//Check if tower is completed
       integer j;
