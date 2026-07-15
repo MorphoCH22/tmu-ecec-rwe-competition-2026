@@ -92,8 +92,9 @@
       // \------------------------------/
 
       // PROBABILITY CONSTANTS & RECOMENDED THRESHOLD
-      localparam [8:0] roll_probabilities [12:2] = {171, 302, 461, 580, 727, 834, 727, 580, 461, 302, 171};
-      localparam [9:0] probability_threshold = 10'd1500;
+      localparam [9:0] roll_probabilities [12:2] = {171, 302, 461, 580, 727, 834, 727, 580, 461, 302, 171};
+      // eventually should be adjustable
+      logic [9:0] probability_threshold = 10'd1500;
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
@@ -128,6 +129,8 @@
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
+
+
       logic [3:0] best_sum;
       logic [10:0] best_probability;
       logic best_pair;
@@ -143,9 +146,7 @@
         best_probability <= current_probability;
         best_pairing <= p;
     end
-
 end
-
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
