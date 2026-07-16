@@ -112,7 +112,9 @@
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
-
+      logic [3:0] eligible_tower_stack [2:0];
+      logic [1:0] eligible_tower_pointer;
+      
 
       logic [3:0] best_sum;
       logic [10:0] best_probability;
