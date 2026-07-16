@@ -92,48 +92,76 @@
       // \------------------------------/
 
       // PROBABILITY CONSTANTS & RECOMENDED THRESHOLD
-      localparam [9:0] roll_probabilities [12:2] = {171, 302, 461, 580, 727, 834, 727, 580, 461, 302, 171};
-      // eventually should be adjustable
-      logic [9:0] probability_threshold = 10'd1500;
+      localparam [8:0] roll_probabilities [12:2] = '{171, 302, 461, 580, 727, 834, 727, 580, 461, 302, 171};
+      localparam [9:0] probability_threshold = 10'd1500;
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
-      logic tower_completed [12:2];//Check if tower is completed
-
       integer i;
+
+      // TODO: might need to consider if combinational logic would be better here...
       always_comb begin
-        for (i = 2; i <= 12; i = i + 1) begin
-          tower_distance[i] = tower_height[i] - tower_climb_floor[i];
-        end
-        for (i = 2; i <= 12; i = i + 1) begin
-          tower_completed[i] = my_turn && tower_climbing[i] && tower_distance[i] == 4'd0;
-        end
+        if (reset) begin
+          for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= 4'd0;
+    	  end
+    	else begin
+          for (i = 2; i <= 12; i = i + 1)
+            tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
+    	  end
       end
 
-      // ELIGIBLE TOWERS TRACKING
-      logic eligible_towers [2:12];
-      logic [3:0] eligible_towers_stack [2:0];
-      logic [1:0] eligible_towers_pointer;
-      
+      logic tower_completed [12:2];//Check if tower is completed
+      integer j;
+      always_comb begin
+        for (j = 2; j <= 12; j = j + 1) begin
+            if (my_turn && tower_climbing[j] && tower_distance[j] == 4'd0) begin
+                tower_completed[j] = 1'b1;
+            end else begin
+                tower_completed[j] = 1'b0;
+            end
+      end
+      end
 
+
+      //Checking each pairing to see any tower is one floor away from completion
+      logic one_floor_away_pairing;
+      logic one_floor_away_pairing_index [2:0];
+
+      integer pn, pp;
+      always_comb begin
+         one_floor_away_pairing = 1'b0;
+         one_floor_away_pairing_index = 3'd0;
+         for(pn = 0; pn < 3; pn = pn + 1) begin
+            for(pp = 0; pp < 2; pp = pp + 1) begin
+               if (tower_distance[pairing_sum[pn][pp]] == 4'd1) begin
+                  one_floor_away_pairing = 1'b1; // Set flag if any pairing has a tower that is one floor away from completion
+                  one_floor_away_pairing_index[pn] = pn*2+ pp; // Store the index of the pairing that is one floor away
+               end
+            end
+         end
+
+      // ELIGIBLE TOWERS STACK
+      // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
       logic [3:0] best_sum;
       logic [10:0] best_probability;
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
-
       integer p;
+      for(p = 0; p < 3; p = p + 1) begin
 
-      always_comb begin
-        for(p = 0; p < 3; p = p + 1) begin
-          current_probability = roll_probabilities[pairing_sum[p][0]] + roll_probabilities[pairing_sum[p][1]];
+      current_probability =
+         roll_probabilities[pairing_sum[p][0]] +
+         roll_probabilities[pairing_sum[p][1]];
 
-          if(current_probability > best_probability) begin
-            best_probability = current_probability;
-            best_pairing     = p[1:0]; // Cast/slice integer 'p' to match 2-bit variable
-          end
-        end
+      if(current_probability > best_probability) begin
+         best_probability <= current_probability;
+         best_pairing <= p;
       end
+
+   end
+
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
