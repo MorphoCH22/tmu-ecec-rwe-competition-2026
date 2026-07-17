@@ -122,6 +122,18 @@
             end
       end
       end
+      
+      // Check if each pairing has two eligible towers
+      logic two_eligible_towers [2:0];
+      integer p;
+
+      always_comb begin
+         for (p = 0; p < 3; p = p + 1) begin
+         two_eligible_towers[p] =
+            eligible_towers[pairing_sum[p][0]] &&
+            eligible_towers[pairing_sum[p][1]];
+    end
+end
 
 
       //Checking each pairing to see any tower is one floor away from completion
