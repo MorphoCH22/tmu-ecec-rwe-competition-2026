@@ -97,18 +97,21 @@
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
-      logic tower_completed, tower_one_away, tower_two_away [12:2];
+      logic [12:2] tower_completed;
+      logic [12:2] tower_one_away;
+      logic [12:2] tower_two_away;
+
 
       integer i;
 
       // TODO: might need to consider if combinational logic would be better here...
       always_comb begin
-	for (i = 2; i <= 12; i = i + 1)
-          tower_distance[i] 	= 	tower_height[i] - tower_climb_floor[i];
-	  tower_complete[i] 	=	my_turn && tower_distance[i] == 4'd0
-          tower_one_away[i]	=	my_turn && tower_distance[i] == 4'd1
-	  tower_two_away[i]	=	my_turn && tower_distance[i] == 4'd2
-    	end
+	   for (i = 2; i <= 12; i = i + 1) begin
+      tower_distance[i] 	= 	tower_height[i] - tower_climb_floor[i];
+	   tower_completed[i] 	=	my_turn && (tower_distance[i] == 4'd0);
+      tower_one_away[i]	=	my_turn && (tower_distance[i] == 4'd1);
+	   tower_two_away[i]	=	my_turn && (tower_distance[i] == 4'd2);
+    	   end
       end
       
       // Check if each pairing has two eligible towers
@@ -120,11 +123,13 @@
 
       always_comb begin
          for (p = 0; p < 3; p = p + 1) begin
-         two_eligible_towers[p] =
-            eligible_towers[pairing_sum[p][0]] &&
-            eligible_towers[pairing_sum[p][1]];
-	 same_pair_towers[p] =
-	    eligible_towers[p] && (pairing_sum[p][0] == pairing_sum[p][1]);
+            two_eligible_towers[p] =
+               eligible_towers[pairing_sum[p][0]] &&
+               eligible_towers[pairing_sum[p][1]];
+	         
+            same_pair_towers[p] =
+	            eligible_towers[pairing_sum[p][0]] && 
+               (pairing_sum[p][0] == pairing_sum[p][1]);
     end
 end
 
@@ -136,6 +141,7 @@ end
       always_comb begin
          one_floor_away_pairing = 1'b0;
          one_floor_away_pairing_index = 3'd0;
+         
          for(pn = 0; pn < 3; pn = pn + 1) begin
             for(pp = 0; pp < 2; pp = pp + 1) begin
                if (tower_distance[pairing_sum[pn][pp]] == 4'd1) begin
@@ -144,6 +150,7 @@ end
                end
             end
          end
+      end
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
@@ -154,7 +161,11 @@ end
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
-      integer p;
+   
+   always_comb begin
+      best_probability = 11'd0;
+      best_pairing = 2'd0;  
+      
       for(p = 0; p < 3; p = p + 1) begin
 
       current_probability =
@@ -162,11 +173,12 @@ end
          roll_probabilities[pairing_sum[p][1]];
 
       if(current_probability > best_probability) begin
-         best_probability <= current_probability;
-         best_pairing <= p;
+         best_probability = current_probability;
+         best_pairing = p;
       end
 
    end
+end
 
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
