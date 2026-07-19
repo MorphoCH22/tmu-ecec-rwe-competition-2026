@@ -101,30 +101,16 @@
 
       // TODO: might need to consider if combinational logic would be better here...
       always_comb begin
-        if (reset) begin
-          for (i = 2; i <= 12; i = i + 1)
-            tower_distance[i] <= 4'd0;
-    	  end
-    	else begin
-          for (i = 2; i <= 12; i = i + 1)
-            tower_distance[i] <= tower_height[i] - tower_climb_floor[i];
-    	  end
-      end
-
-      logic tower_completed [12:2];//Check if tower is completed
-      integer j;
-      always_comb begin
-        for (j = 2; j <= 12; j = j + 1) begin
-            if (my_turn && tower_climbing[j] && tower_distance[j] == 4'd0) begin
-                tower_completed[j] = 1'b1;
-            end else begin
-                tower_completed[j] = 1'b0;
-            end
-      end
+	for (i = 2; i <= 12; i = i + 1)
+          tower_distance[i] 	= 	tower_height[i] - tower_climb_floor[i];
+	  tower_completed[i] 	=	my_turn && tower_climbing[i] && tower_distance[i] == 4'd0
+    	end
       end
       
       // Check if each pairing has two eligible towers
+      logic eligible_towers [12:0];
       logic two_eligible_towers [2:0];
+      logic two_duplicate_towers [2:0];
       integer p;
 
       always_comb begin
@@ -132,6 +118,8 @@
          two_eligible_towers[p] =
             eligible_towers[pairing_sum[p][0]] &&
             eligible_towers[pairing_sum[p][1]];
+	 two_duplicate_towers[p] =
+	    eligible_towers[p] && (pairing_sum[p][0] == pairing_sum[p][1]);
     end
 end
 
