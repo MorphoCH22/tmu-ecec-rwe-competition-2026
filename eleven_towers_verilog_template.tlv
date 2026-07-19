@@ -97,20 +97,25 @@
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
+      logic tower_completed, tower_one_away, tower_two_away [12:2];
+
       integer i;
 
       // TODO: might need to consider if combinational logic would be better here...
       always_comb begin
 	for (i = 2; i <= 12; i = i + 1)
           tower_distance[i] 	= 	tower_height[i] - tower_climb_floor[i];
-	  tower_completed[i] 	=	my_turn && tower_climbing[i] && tower_distance[i] == 4'd0
+	  tower_complete[i] 	=	my_turn && tower_distance[i] == 4'd0
+          tower_one_away[i]	=	my_turn && tower_distance[i] == 4'd1
+	  tower_two_away[i]	=	my_turn && tower_distance[i] == 4'd2
     	end
       end
       
       // Check if each pairing has two eligible towers
       logic eligible_towers [12:0];
       logic two_eligible_towers [2:0];
-      logic two_duplicate_towers [2:0];
+      logic same_pair_towers [2:0];
+
       integer p;
 
       always_comb begin
@@ -118,11 +123,10 @@
          two_eligible_towers[p] =
             eligible_towers[pairing_sum[p][0]] &&
             eligible_towers[pairing_sum[p][1]];
-	 two_duplicate_towers[p] =
+	 same_pair_towers[p] =
 	    eligible_towers[p] && (pairing_sum[p][0] == pairing_sum[p][1]);
     end
 end
-
 
       //Checking each pairing to see any tower is one floor away from completion
       logic one_floor_away_pairing;
@@ -143,6 +147,8 @@ end
 
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
+      
+
       logic [3:0] best_sum;
       logic [10:0] best_probability;
       logic best_pair;
