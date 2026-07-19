@@ -152,7 +152,7 @@ end
                end
             end
          end
-
+end
       // ELIGIBLE TOWERS STACK
       // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
       logic [3:0] best_sum;
@@ -160,7 +160,21 @@ end
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
+      logic eligible_towers [12:2];
       integer p;
+      always_ff @(posedge clk) begin
+    if (reset) begin
+        // Initialize every tower
+        for (tower = 2; tower <= 12; tower = tower + 1)
+            eligible_towers[tower] <= 1'b0;   // or 1'b1 depending on your convention
+    end
+    else begin
+        for (tower = 2; tower <= 12; tower = tower + 1) begin
+            if (tower_claimed[tower] || tower_completed[tower])
+                eligible_towers[tower] <= 1'b1;
+        end
+    end
+end
       for(p = 0; p < 3; p = p + 1) begin
 
       current_probability =
