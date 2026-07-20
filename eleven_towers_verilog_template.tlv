@@ -192,7 +192,49 @@
    		end
    	end
 
+      //priority logic
+      localparam [15:0] TIER_FINISH_NOW    = 16'd50000; // distance==1
+      localparam [15:0] TIER_DOUBLE_FINISH = 16'd40000; // double climb finishes tower
+      localparam [15:0] TIER_ADVANCE_DIST2 = 16'd30000; // distance==2
+      localparam [15:0] TIER_TWO_TOWERS    = 16'd20000; // two different towers
+      localparam [15:0] TIER_ONE_TOWER     = 16'd10000; // one legal lower
+
+      integer h;
+      logic[3:0] sum0_, sum1_, dist0_, dist1_;
+      logic same_sum, elig0, elig1;
+
+      always_comb begin
+         for (h = 0; h < 3; h = h + 1) begin
+            sum0_ = pairing_sum[h][0];
+            sum1_ = pairing_sum[h][1];
+            dist0_ = tower_distance[sum0_];
+            dist1_ = tower_distance[sum1_];
+            elig0 = eligible_towers[sum0_];
+            elig1 = eligible_towers[sum1_];
+            same_sum = (sum0_ == sum1_);
+               if (elig0 && elig1) begin
+                  if(same_sum && dist0_ == 4'd2) begin
+                     pairing_score[h] = TIER_DOUBLE_FINISH;
+                  end else if (dist0_ == 4'd1 || dist1_ == 4'd1) begin
+                     pairing_score[h] = TIER_FINISH_NOW;
+                  end else if (dist0_ == 4'd2 || dist1_ == 4'd2) begin
+                     pairing_score[h] = TIER_ADVANCE_DIST2;
+                  end else begin
+                     pairing_score[h] = TIER_TWO_TOWERS;
+                  end
+               end else if (elig0 || elig1) begin
+                  pairing_score[h] = TIER_ONE_TOWER;
+               end else begin
+                  pairing_score[h] = 16'd0; // No eligible towers for this pairing
+               end
+
+         end
+      end
       
+
+
+
+
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
       // Random scoring for each pairing (replace with your strategy)
