@@ -97,28 +97,32 @@
 
       // TOWER DISTANCE CALCULATIONS
       logic [3:0] tower_distance [12:2];
-      logic [12:2] tower_completed;
-      logic [12:2] tower_one_away;
-      logic [12:2] tower_two_away;
+      logic tower_completed [12:2];
+      logic tower_one_away [12:2];
+      logic tower_two_away [12:2];      
+      // ELIGIBLE TOWER CALCULATIONS
+      logic eligible_towers [12:2];						// IF TOWER IS ELIGIBLE
+      logic two_eligible_towers							// ONE ORDERING OF TWO ELIGIBLE PAIRS EXISTS
+      logic two_eligible_towers_index [2:0];			// IF PAIRING ORDER HAS 2 ELIGIBLE TOWERS
+      logic eligible_count [2:0];						// NUMBER OF ELIGIBLE THIS TURN
+      // SPECIFIC CASES TRACKING
+      logic same_pair_towers [2:0];						// TWO PAIRS HAVE SAME SUM
+      logic one_floor_away_pairing;						// ONE FLOOR AWAY PAIR EXISTS
+      logic one_floor_away_pairing_index [2:0];		// PAIRING ORDER HAS A ONE AWAY
 
-
+      // Calculate tower_distance related calculations
       integer i;
 
-      // TODO: might need to consider if combinational logic would be better here...
       always_comb begin
-	   for (i = 2; i <= 12; i = i + 1) begin
-      tower_distance[i] 	= 	tower_height[i] - tower_climb_floor[i];
-	   tower_completed[i] 	=	my_turn && (tower_distance[i] == 4'd0);
-      tower_one_away[i]	=	my_turn && (tower_distance[i] == 4'd1);
-	   tower_two_away[i]	=	my_turn && (tower_distance[i] == 4'd2);
+      	for (i = 2; i <= 12; i = i + 1) begin
+      		tower_distance[i] = tower_height[i] - tower_climb_floor[i];
+	   		tower_completed[i] = my_turn && (tower_distance[i] == 4'd0);
+      		tower_one_away[i] = my_turn && (tower_distance[i] == 4'd1);
+	   		tower_two_away[i] = my_turn && (tower_distance[i] == 4'd2);
     	   end
       end
       
-      // Check if each pairing has two eligible towers
-      logic eligible_towers [12:0];
-      logic two_eligible_towers [2:0];
-      logic same_pair_towers [2:0];
-
+      // Check if each pairing has two eligible towers or duplicates
       integer p;
 
       always_comb begin
@@ -126,17 +130,12 @@
             two_eligible_towers[p] =
                eligible_towers[pairing_sum[p][0]] &&
                eligible_towers[pairing_sum[p][1]];
-	         
             same_pair_towers[p] =
-	            eligible_towers[pairing_sum[p][0]] && 
                (pairing_sum[p][0] == pairing_sum[p][1]);
-    end
-end
+    		end
+		end
 
       //Checking each pairing to see any tower is one floor away from completion
-      logic one_floor_away_pairing;
-      logic one_floor_away_pairing_index [2:0];
-
       integer pn, pp;
       always_comb begin
          one_floor_away_pairing = 1'b0;
@@ -150,52 +149,48 @@ end
                end
             end
          end
-end
-      end
+		end
 
       // ELIGIBLE TOWERS STACK
-      // TODO: lets put a stack-like data structure that keeps eligible towers for easy access
-      
-
+      always_ff @(posedge clk) begin
+    		if (reset) begin
+    			eligible_count <= 2'd0;
+        		// Initialize every tower
+        		for (tower = 2; tower <= 12; tower = tower + 1)
+            	already_pushed[tower] <= 1'b0;   // or 1'b1 depending on your convention
+    			end
+    		else begin
+        		for (tower = 2; tower <= 12; tower = tower + 1) begin
+            	if (tower_claimed[tower] || tower_completed[tower])
+               	 eligible_towers[tower] <= 1'b1;
+        			end
+    			end
+			end
+		end
+   
+      // BEST_SUM CALCULATIONS
       logic [3:0] best_sum;
       logic [10:0] best_probability;
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
-      logic eligible_towers [12:2];
       integer p;
-      always_ff @(posedge clk) begin
-    if (reset) begin
-    eligible_count <= 4'd0;
-        // Initialize every tower
-        for (tower = 2; tower <= 12; tower = tower + 1)
-            already_pushed[tower] <= 1'b0;   // or 1'b1 depending on your convention
-    end
-    else begin
-        for (tower = 2; tower <= 12; tower = tower + 1) begin
-            if (tower_claimed[tower] || tower_completed[tower])
-                eligible_towers[tower] <= 1'b1;
-        end
-    end
-end
-   
-   always_comb begin
-      best_probability = 11'd0;
-      best_pairing = 2'd0;  
+		always_comb begin
+      	best_probability = 11'd0;
+      	best_pairing = 2'd0;  
       
-      for(p = 0; p < 3; p = p + 1) begin
+      	for(p = 0; p < 3; p = p + 1) begin
 
-      current_probability =
-         roll_probabilities[pairing_sum[p][0]] +
-         roll_probabilities[pairing_sum[p][1]];
+      		current_probability =
+         		roll_probabilities[pairing_sum[p][0]] +
+         		roll_probabilities[pairing_sum[p][1]];
 
-      if(current_probability > best_probability) begin
-         best_probability = current_probability;
-         best_pairing = p;
-      end
-
-   end
-end
+      		if(current_probability > best_probability) begin
+         		best_probability = current_probability;
+         		best_pairing = p;
+      		end
+   		end
+   	end
 
       
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
