@@ -164,9 +164,10 @@ end
       integer p;
       always_ff @(posedge clk) begin
     if (reset) begin
+    eligible_count <= 4'd0;
         // Initialize every tower
         for (tower = 2; tower <= 12; tower = tower + 1)
-            eligible_towers[tower] <= 1'b0;   // or 1'b1 depending on your convention
+            already_pushed[tower] <= 1'b0;   // or 1'b1 depending on your convention
     end
     else begin
         for (tower = 2; tower <= 12; tower = tower + 1) begin
