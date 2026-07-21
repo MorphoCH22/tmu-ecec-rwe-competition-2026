@@ -102,9 +102,10 @@
       logic tower_two_away [12:2];      
       // ELIGIBLE TOWER CALCULATIONS
       logic eligible_towers [12:2];						// IF TOWER IS ELIGIBLE
-      logic two_eligible_towers							// ONE ORDERING OF TWO ELIGIBLE PAIRS EXISTS
-      logic two_eligible_towers_index [2:0];			// IF PAIRING ORDER HAS 2 ELIGIBLE TOWERS
+      logic [3:0] eligible_stack [2:0];				// HOLDS AVAILABLE TOWER NUMBERS
       logic eligible_count [2:0];						// NUMBER OF ELIGIBLE THIS TURN
+      logic two_eligible_towers;							// ONE ORDERING OF TWO ELIGIBLE PAIRS EXISTS
+      logic two_eligible_towers_index [2:0];			// IF PAIRING ORDER HAS 2 ELIGIBLE TOWERS
       // SPECIFIC CASES TRACKING
       logic same_pair_towers [2:0];						// TWO PAIRS HAVE SAME SUM
       logic one_floor_away_pairing;						// ONE FLOOR AWAY PAIR EXISTS
@@ -153,20 +154,16 @@
 
       // ELIGIBLE TOWERS STACK
       always_ff @(posedge clk) begin
-    		if (reset) begin
+    		if (reset || !my_turn) begin
     			eligible_count <= 2'd0;
-        		// Initialize every tower
-        		for (tower = 2; tower <= 12; tower = tower + 1)
-            	already_pushed[tower] <= 1'b0;   // or 1'b1 depending on your convention
-    			end
+         end
     		else begin
         		for (tower = 2; tower <= 12; tower = tower + 1) begin
-            	if (tower_claimed[tower] || tower_completed[tower])
+            	if (tower_claimed[tower] || tower_completed[tower]) begin
                	 eligible_towers[tower] <= 1'b1;
         			end
     			end
-			end
-		end
+    		end
    
       // BEST_SUM CALCULATIONS
       logic [3:0] best_sum;
