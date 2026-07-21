@@ -103,18 +103,21 @@
       // ELIGIBLE TOWER CALCULATIONS
       logic eligible_towers [12:2];						// IF TOWER IS ELIGIBLE
       logic [3:0] eligible_stack [2:0];				// HOLDS AVAILABLE TOWER NUMBERS
-      logic eligible_count [2:0];						// NUMBER OF ELIGIBLE THIS TURN
+      logic [2:0] eligible_count;						// NUMBER OF ELIGIBLE THIS TURN
       logic two_eligible_towers;							// ONE ORDERING OF TWO ELIGIBLE PAIRS EXISTS
       logic two_eligible_towers_index [2:0];			// IF PAIRING ORDER HAS 2 ELIGIBLE TOWERS
       // SPECIFIC CASES TRACKING
       logic same_pair_towers [2:0];						// TWO PAIRS HAVE SAME SUM
       logic one_floor_away_pairing;						// ONE FLOOR AWAY PAIR EXISTS
-      logic one_floor_away_pairing_index [2:0];		// PAIRING ORDER HAS A ONE AWAY
+      logic [2:0] one_floor_away_pairing_index;		// PAIRING ORDER HAS A ONE AWAY
 
+      // SCORING VARS (since output is wire)
+      logic [15:0] base_pairing_scores [2:0];
+      
       // Calculate tower_distance related calculations
-      integer i;
 
       always_comb begin
+      	integer i;
       	for (i = 2; i <= 12; i = i + 1) begin
       		tower_distance[i] = tower_height[i] - tower_climb_floor[i];
 	   		tower_completed[i] = my_turn && (tower_distance[i] == 4'd0);
@@ -124,21 +127,23 @@
       end
       
       // Check if each pairing has two eligible towers or duplicates
-      integer p;
-
+      
       always_comb begin
+      	integer p;
          for (p = 0; p < 3; p = p + 1) begin
-            two_eligible_towers[p] =
-               eligible_towers[pairing_sum[p][0]] &&
-               eligible_towers[pairing_sum[p][1]];
+         	if (eligible_towers[pairing_sum[p][0]] &&
+               eligible_towers[pairing_sum[p][1]]) begin
+               two_eligible_towers = 1'b1;
+               two_eligible_towers_index[p] = 1'b1;
+            end
             same_pair_towers[p] =
                (pairing_sum[p][0] == pairing_sum[p][1]);
     		end
 		end
 
       //Checking each pairing to see any tower is one floor away from completion
-      integer pn, pp;
       always_comb begin
+      	integer pn, pp;
          one_floor_away_pairing = 1'b0;
          one_floor_away_pairing_index = 3'd0;
          
@@ -158,12 +163,14 @@
     			eligible_count <= 2'd0;
          end
     		else begin
+         	integer tower;
         		for (tower = 2; tower <= 12; tower = tower + 1) begin
             	if (tower_claimed[tower] || tower_completed[tower]) begin
                	 eligible_towers[tower] <= 1'b1;
         			end
     			end
     		end
+      end
    
       // BEST_SUM CALCULATIONS
       logic [3:0] best_sum;
@@ -171,8 +178,8 @@
       logic best_pair;
       logic [1:0] best_pairing;
       logic [10:0] current_probability;
-      integer p;
 		always_comb begin
+      	integer p;
       	best_probability = 11'd0;
       	best_pairing = 2'd0;  
       
@@ -211,18 +218,18 @@
             same_sum = (sum0_ == sum1_);
                if (elig0 && elig1) begin
                   if(same_sum && dist0_ == 4'd2) begin
-                     pairing_score[h] = TIER_DOUBLE_FINISH;
+                     base_pairing_scores[h] = TIER_DOUBLE_FINISH;
                   end else if (dist0_ == 4'd1 || dist1_ == 4'd1) begin
-                     pairing_score[h] = TIER_FINISH_NOW;
+                     base_pairing_scores[h] = TIER_FINISH_NOW;
                   end else if (dist0_ == 4'd2 || dist1_ == 4'd2) begin
-                     pairing_score[h] = TIER_ADVANCE_DIST2;
+                     base_pairing_scores[h] = TIER_ADVANCE_DIST2;
                   end else begin
-                     pairing_score[h] = TIER_TWO_TOWERS;
+                     base_pairing_scores[h] = TIER_TWO_TOWERS;
                   end
                end else if (elig0 || elig1) begin
-                  pairing_score[h] = TIER_ONE_TOWER;
+                  base_pairing_scores[h] = TIER_ONE_TOWER;
                end else begin
-                  pairing_score[h] = 16'd0; // No eligible towers for this pairing
+                  base_pairing_scores[h] = 16'd0; // No eligible towers for this pairing
                end
 
          end
