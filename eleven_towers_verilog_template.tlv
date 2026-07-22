@@ -125,19 +125,20 @@
       
       //Checking each pairing to see any tower is one floor away from completion
       always_comb begin
-      	integer pn, pp;
+         integer pn, pp;
+
          one_floor_away_pairing = 1'b0;
          one_floor_away_pairing_index = 3'd0;
-         
-         for(pn = 0; pn < 3; pn = pn + 1) begin
-            for(pp = 0; pp < 2; pp = pp + 1) begin
-               if (tower_distance[pairing_sum[pn][pp]] == 4'd1) begin
-                  one_floor_away_pairing = 1'b1; // Set flag if any pairing has a tower that is one floor away from completion
-                  one_floor_away_pairing_index[pn] = pn*2+ pp; // Store the index of the pairing that is one floor away
-               end
+
+      for (pn = 0; pn < 3; pn = pn + 1) begin
+        for (pp = 0; pp < 2; pp = pp + 1) begin
+            if (tower_distance[pairing_sum[pn][pp]] == 4'd1) begin
+                one_floor_away_pairing = 1'b1;
+                one_floor_away_pairing_index = pn;
             end
-         end
-		end
+        end
+    end
+end
 
       // ELIGIBLE TOWERS STACK
       always_ff @(posedge clk) begin
