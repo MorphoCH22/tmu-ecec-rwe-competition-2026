@@ -149,7 +149,7 @@ end
          	integer tower;
         		for (tower = 2; tower <= 12; tower = tower + 1) begin
             	if (tower_claimed[tower] || tower_completed[tower]) begin
-               	 eligible_towers[tower] <= 1'b1;
+               	 eligible_towers[tower] <= 1'b0;
         			end
     			end
     		end
