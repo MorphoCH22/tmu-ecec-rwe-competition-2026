@@ -254,6 +254,95 @@ end
          // max(added_probabilities[i]) when < 3 or max(5000 - added_probabilities[i])
          
       end
+
+// TIER SCORING
+always_comb begin
+
+   for (h = 0; h < 3; h = h + 1) begin
+
+      sum0_ = pairing_sum[h][0];
+      sum1_ = pairing_sum[h][1];
+
+      dist0_ = tower_distance[sum0_];
+      dist1_ = tower_distance[sum1_];
+
+      elig0 = eligible_towers[sum0_];
+      elig1 = eligible_towers[sum1_];
+
+
+      base_pairing_scores[h] = 16'd0;
+
+
+      if (elig0 && elig1) begin
+
+         if ((sum0_ != sum1_) &&
+             (dist0_ == 1) &&
+             (dist1_ == 1))
+
+            base_pairing_scores[h] = TIER_DOUBLE_FINISH;
+
+
+         else if ((dist0_ == 1) ||
+                  (dist1_ == 1))
+
+            base_pairing_scores[h] = TIER_FINISH_NOW;
+
+
+         else if ((sum0_ == sum1_) &&
+                  (dist0_ == 2))
+
+            base_pairing_scores[h] = TIER_FINISH_NOW;
+
+
+         else if (sum0_ == sum1_)
+
+            base_pairing_scores[h] = TIER_CLIMB_TWICE;
+
+
+         else
+
+            base_pairing_scores[h] = TIER_TWO_TOWERS;
+
+
+      end
+
+      else if (elig0 || elig1) begin
+
+         if ((dist0_ == 1) ||
+             (dist1_ == 1))
+
+            base_pairing_scores[h] = TIER_FINISH_NOW;
+
+         else
+
+            base_pairing_scores[h] = TIER_ONE_TOWER;
+
+      end
+
+   end
+
+end
+// WINNER SELECTION
+always_comb begin
+
+   best_score = 0;
+   best_pairing = 0;
+
+   for (p = 0; p < 3; p = p + 1) begin
+
+      final_pairing_scores[p] =
+          base_pairing_scores[p] +
+          added_probabilities[p];
+
+
+      if (final_pairing_scores[p] > best_score) begin
+          best_score = final_pairing_scores[p];
+          best_pairing = p;
+      end
+
+   end
+
+end
       
 
 
