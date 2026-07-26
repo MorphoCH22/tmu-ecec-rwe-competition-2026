@@ -117,7 +117,7 @@
       	integer i;
       	for (i = 2; i <= 12; i = i + 1) begin
       		tower_distance[i] = tower_height[i] - tower_climb_floor[i];
-	   		tower_completed[i] = my_turn && (tower_distance[i] == 4'd0);
+	   		tower_completed[i] = my_turn && tower_climbing[i] && (tower_distance[i] == 4'd0);
       		tower_one_away[i] = my_turn && (tower_distance[i] == 4'd1);
 	   		tower_two_away[i] = my_turn && (tower_distance[i] == 4'd2);
     	   end
@@ -141,19 +141,11 @@
 end
 
       // ELIGIBLE TOWERS STACK
-      always_ff @(posedge clk) begin
-    		if (reset || !my_turn) begin
-    			eligible_count <= 2'd0;
+      always_comb begin
+         for (tower = 2; tower <= 12; tower = tower + 1) begin
+            eligible_towers[tower] = !tower_claimed[tower] && 
+                  !tower_completed[tower] && (tower_climbing[tower] || (climbing_cnt < 2'd3));
          end
-    		else begin
-         	integer tower;
-        		for (tower = 2; tower <= 12; tower = tower + 1) begin
-            	if (tower_claimed[tower] || tower_completed[tower]) begin
-               	 eligible_towers[tower] <= 1'b0;
-        			end
-    			end
-    		end
-      end
    
       // BEST_SUM CALCULATIONS
       logic [3:0] best_sum;
@@ -200,10 +192,10 @@ end
          climb_twice = 0;
          two_towers = 0;
          for (h = 0; h < 3; h = h + 1) begin
-         	double_finish_towers[h] = 0'b0;
-            finish_now_towers[h] = 0'b0;
-            climb_twice_towers[h] = 0'b0;
-            two_eligible_towers[h] = 0'b0;
+         	double_finish_towers[h] = 1'b0;
+            finish_now_towers[h] = 1'b0;
+            climb_twice_towers[h] = 1'b0;
+            two_eligible_towers[h] = 1'b0;
             
             sum0_ = pairing_sum[h][0];
             sum1_ = pairing_sum[h][1];
