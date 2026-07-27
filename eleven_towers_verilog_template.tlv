@@ -257,9 +257,31 @@ end
          
       end
       
+      //END TURN LOGIC
+      localparam [7:0] ROLLS_THRESHOLD_FULL = 8'd3; // climbing_cnt == 3; all slots filled
+      localparam [7:0] ROLLS_THRESHOLD_PARTIAL = 8'd6; // climbing_cnt < 3; can still climb more
 
+      logic any_tower_complete_now; //at least one tower is complete now
+      logic rolls_threshold_hit;
+      logic [7:0] current_threshold; //current threshold based on climbing_cnt
 
+      integer t;
 
+      always_comb begin
+         any_tower_complete_now = 1'b0;
+         for (t = 2; t <= 12; t = t + 1) begin
+            if (tower_climbing[t] && tower_completed[t]) begin
+               any_tower_complete_now = 1'b1;
+            end
+         end
+      end
+
+      always_comb begin
+         current_threshold = (climbing_cnt == 2'd3) ? ROLLS_THRESHOLD_FULL : ROLLS_THRESHOLD_PARTIAL;
+         rolls_threshold_hit = (rolls_this_turn >= current_threshold);
+      end
+
+      assign end_turn = my_turn && (rolls_threshold_hit || any_tower_complete_now);
 
       // Example: Simple strategy - score each pairing randomly and end turn after 5 rolls
       
@@ -280,7 +302,7 @@ end
       // End turn strategy (replace with your logic)
       // END_TURN LOGIC
       // TODO: Something like end_turn = (rolls_this_turn >= 8'd3 && climbing_cnt == 3) || (any of distance_from_top[12:2] == 0)
-      assign end_turn = (rolls_this_turn >= 8'd3);
+      // assign end_turn = (rolls_this_turn >= 8'd3);
 
       endmodule
    '])
