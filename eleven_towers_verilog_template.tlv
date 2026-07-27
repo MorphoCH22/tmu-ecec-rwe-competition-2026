@@ -112,7 +112,7 @@
         integer i;
         for (i = 2; i <= 12; i = i + 1) begin
             tower_distance[i] = tower_height[i] - tower_climb_floor[i];
-            tower_completed[i] = my_turn && tower_climbing[i] && (tower_distance[i] == 4'd0);
+            tower_completed[i] = my_turn && (tower_distance[i] == 4'd0);
             tower_one_away[i] = my_turn && (tower_distance[i] == 4'd1);
             tower_two_away[i] = my_turn && (tower_distance[i] == 4'd2);
         end
@@ -208,7 +208,7 @@
                if (!same_pair_towers[h] && dist0_ == 4'd1 && dist1_ == 4'd1) begin
                   double_finish = 1'b1;
                   double_finish_towers[h] = 1'b1;
-                  base_pairing_scores[h] = TIER_DOUBLE_FINISH;   
+                  base_pairing_scores[h] = TIER_DOUBLE_FINISH;
                end else if (!same_pair_towers[h] && (dist0_ == 4'd1 || dist1_ == 4'd1)) begin
                   finish_now = 1'b1;
                   finish_now_towers[h] = 1'b1;
@@ -238,32 +238,6 @@
          end
       end
       
-      // END TURN LOGIC
-      localparam [7:0] ROLLS_THRESHOLD_FULL = 8'd3;    // climbing_cnt == 3; all slots filled
-      localparam [7:0] ROLLS_THRESHOLD_PARTIAL = 8'd6; // climbing_cnt < 3; can still climb more
-
-      logic any_tower_complete_now; // at least one tower is complete now
-      logic rolls_threshold_hit;
-      logic [7:0] current_threshold; // current threshold based on climbing_cnt
-
-      integer t;
-
-      always_comb begin
-         any_tower_complete_now = 1'b0;
-         for (t = 2; t <= 12; t = t + 1) begin
-            if (tower_climbing[t] && tower_completed[t]) begin
-               any_tower_complete_now = 1'b1;
-            end
-         end
-      end
-
-      always_comb begin
-         current_threshold = (climbing_cnt == 2'd3) ? ROLLS_THRESHOLD_FULL : ROLLS_THRESHOLD_PARTIAL;
-         rolls_threshold_hit = (rolls_this_turn >= current_threshold);
-      end
-
-      assign end_turn = my_turn && (rolls_threshold_hit || any_tower_complete_now);
-
       // OUTPUT LOGIC & ASSIGNMENTS
       logic [15:0] pairing_score_reg[2:0];
       logic [0:0] priority_pair_reg[2:0];
@@ -276,9 +250,8 @@
             end else begin
                pairing_score_reg[i] = 16'd0;
             end
-
             if (roll_probabilities[pairing_sum[i][0]] >= roll_probabilities[pairing_sum[i][1]]) begin
-               priority_pair_reg[i] = 1'b0; 
+               priority_pair_reg[i] = 1'b0;
             end else begin
                priority_pair_reg[i] = 1'b1; 
             end
@@ -293,6 +266,32 @@
       assign priority_pair[1] = priority_pair_reg[1];
       assign priority_pair[2] = priority_pair_reg[2];
 
+      // END TURN LOGIC
+      localparam [7:0] ROLLS_THRESHOLD_FULL = 8'd5;    // climbing_cnt == 3; all slots filled
+      localparam [7:0] ROLLS_THRESHOLD_PARTIAL = 8'd6; // climbing_cnt < 3; can still climb more
+
+      logic any_tower_complete_now; // at least one tower is complete now
+      logic rolls_threshold_hit;
+      logic [7:0] current_threshold; // current threshold based on climbing_cnt
+
+      integer t;
+
+      always_comb begin
+         any_tower_complete_now = 1'b0;
+         for (t = 2; t <= 12; t = t + 1) begin
+            if (tower_climbing[t] && (tower_completed[t] || double_finish || finish_now)) begin
+               any_tower_complete_now = 1'b1;
+            end
+         end
+      end
+
+      always_comb begin
+         current_threshold = (climbing_cnt == 2'd3) ? ROLLS_THRESHOLD_FULL : ROLLS_THRESHOLD_PARTIAL;
+         rolls_threshold_hit = (rolls_this_turn >= current_threshold);
+      end
+
+      assign end_turn = my_turn && (rolls_threshold_hit || any_tower_complete_now);
+      
       endmodule
    '])
 
