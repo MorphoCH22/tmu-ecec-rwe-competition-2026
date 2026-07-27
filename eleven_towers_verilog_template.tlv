@@ -142,10 +142,12 @@ end
 
       // ELIGIBLE TOWERS STACK
       always_comb begin
+         integer tower;
          for (tower = 2; tower <= 12; tower = tower + 1) begin
             eligible_towers[tower] = !tower_claimed[tower] && 
                   !tower_completed[tower] && (tower_climbing[tower] || (climbing_cnt < 2'd3));
          end
+      end
    
       // BEST_SUM CALCULATIONS
       logic [3:0] best_sum;
